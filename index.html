@@ -1,0 +1,1960 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071018">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="FluviAI — harta inteligentă pentru pescari: niveluri reale ale apei, vreme, FluviScore, rapoarte live și comunitate. Înscrie-te pe lista beta privată.">
+  <meta name="keywords" content="FluviAI, pescuit, România, Dunăre, nivel apă, vreme pescuit, hartă pescuit, rapoarte live, comunitate pescari, beta">
+  <meta name="author" content="FluviAI">
+  <meta name="contact" content="contact@fluviai.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FluviAI — pescarul tău inteligent">
+  <meta property="og:description" content="Date reale. Rapoarte live. Inteligență explicabilă. Intră în primii 100 de testeri beta FluviAI.">
+  <meta property="og:image" content="fluviai-social-cover.jpg">
+  <meta property="og:locale" content="ro_RO">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>FluviAI — Acolo unde pasiunea întâlnește firul apei</title>
+
+  <!--
+    FLUVIAI LANDING PAGE — CONFIGURARE WAITING LIST
+
+    Varianta recomandată: Supabase, cu ANON KEY public și RLS INSERT-only.
+    NU introduce niciodată service_role key în acest fișier.
+
+    1) Caută în script: const WAITLIST_CONFIG
+    2) Completează supabaseUrl și supabaseAnonKey.
+    3) Creează tabelul beta_waitlist în Supabase și o politică RLS care permite doar INSERT pentru anon.
+    4) Pentru wordmarkul oficial, pune fluviai_wordmark.png în același folder cu index.html.
+    5) Adresa oficială pentru orice întrebare: contact@fluviai.com.
+    6) Limita reală de 100 de înscrieri trebuie aplicată în backend, nu doar în browser.
+
+    Fișierul funcționează și ca landing page fără backend, dar formularul nu poate centraliza
+    înscrierile până când endpointul este configurat.
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #071018;
+      --bg-2: #0f1115;
+      --surface: #111c26;
+      --surface-2: #17212d;
+      --surface-3: #1c2a37;
+      --primary: #00b8d9;
+      --primary-bright: #12d8d6;
+      --primary-soft: rgba(0,184,217,.14);
+      --good: #29e38a;
+      --warning: #ffc857;
+      --danger: #ff5c5c;
+      --ai: #8a7dff;
+      --text: #f5fbff;
+      --muted: #9db2c3;
+      --subtle: #6e8495;
+      --line: rgba(164,200,221,.15);
+      --line-strong: rgba(18,216,214,.28);
+      --shadow: 0 24px 70px rgba(0,0,0,.42);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1180px;
+      --header-h: 76px;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 8%, rgba(0,184,217,.13), transparent 34%),
+        radial-gradient(circle at 82% 22%, rgba(138,125,255,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, #08131d 38%, var(--bg-2) 100%);
+      font-family: Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .38;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, #000, transparent 78%);
+      z-index: -1;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    img { max-width: 100%; display: block; }
+    ::selection { background: rgba(18,216,214,.32); color: white; }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin-inline: auto;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 16px;
+      top: -80px;
+      z-index: 9999;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #001217;
+      font-weight: 800;
+      transition: top .2s ease;
+    }
+    .skip-link:focus { top: 12px; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: var(--header-h);
+      padding-top: env(safe-area-inset-top);
+      border-bottom: 1px solid rgba(164,200,221,.10);
+      background: rgba(7,16,24,.78);
+      backdrop-filter: blur(18px) saturate(1.35);
+    }
+
+    .nav {
+      min-height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      min-width: max-content;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(18,216,214,.24), rgba(0,184,217,.06));
+      border: 1px solid rgba(18,216,214,.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 28px rgba(0,184,217,.12);
+    }
+
+    .brand-mark svg { width: 27px; height: 27px; }
+
+    .official-wordmark {
+      height: 24px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .wordmark-fallback {
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -.8px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #f7fdff 0%, #a7f4ff 48%, var(--primary-bright) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .wordmark-fallback b { font-weight: 900; color: var(--primary-bright); }
+
+    .brand-copy small {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255,255,255,.72);
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-links a {
+      padding: 10px 12px;
+      border-radius: 11px;
+      color: #bed0dc;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color .2s ease, background .2s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a:focus-visible { color: white; background: rgba(255,255,255,.05); outline: none; }
+
+    .nav-actions { display: flex; align-items: center; gap: 9px; }
+
+    .lang-switch {
+      display: flex;
+      align-items: center;
+      padding: 3px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+    }
+    .lang-switch button {
+      min-width: 36px;
+      height: 32px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 9px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .lang-switch button.active {
+      color: #001218;
+      background: var(--primary-bright);
+      box-shadow: 0 4px 18px rgba(18,216,214,.25);
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      color: white;
+      background: rgba(255,255,255,.05);
+      cursor: pointer;
+    }
+
+    .btn {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 18px;
+      border-radius: 13px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn:focus-visible { outline: 3px solid rgba(18,216,214,.30); outline-offset: 3px; }
+    .btn-primary {
+      color: #001217;
+      background: linear-gradient(135deg, var(--primary-bright), var(--primary));
+      box-shadow: 0 12px 30px rgba(0,184,217,.24), inset 0 1px 0 rgba(255,255,255,.32);
+    }
+    .btn-secondary {
+      color: white;
+      background: rgba(255,255,255,.055);
+      border-color: var(--line);
+    }
+    .btn-secondary:hover { border-color: var(--line-strong); background: rgba(18,216,214,.07); }
+
+    .hero {
+      position: relative;
+      padding: 82px 0 74px;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -220px;
+      top: 40px;
+      width: 660px;
+      height: 660px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(18,216,214,.16), transparent 66%);
+      filter: blur(12px);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.03fr .97fr;
+      align-items: center;
+      gap: 68px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(18,216,214,.24);
+      background: rgba(0,184,217,.08);
+      color: #baf8ff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 0 0 rgba(41,227,138,.55);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(41,227,138,.45); }
+      70% { box-shadow: 0 0 0 9px rgba(41,227,138,0); }
+      100% { box-shadow: 0 0 0 0 rgba(41,227,138,0); }
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin: 22px 0 20px;
+      max-width: 760px;
+      font-size: clamp(45px, 6vw, 80px);
+      line-height: .98;
+      letter-spacing: -3.3px;
+      font-weight: 900;
+    }
+    .gradient-text {
+      background: linear-gradient(95deg, white 10%, #a8f6ff 52%, var(--primary-bright));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-lead {
+      max-width: 660px;
+      color: #b5c6d2;
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.65;
+    }
+    .hero-lead strong { color: white; font-weight: 700; }
+
+    .hero-actions {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-proof {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .hero-proof span { display: inline-flex; align-items: center; gap: 7px; }
+    .hero-proof svg { width: 16px; height: 16px; color: var(--good); }
+
+    .device-stage {
+      position: relative;
+      min-height: 650px;
+      display: grid;
+      place-items: center;
+      perspective: 1400px;
+    }
+
+    .device-glow {
+      position: absolute;
+      width: 76%;
+      height: 76%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,184,217,.23), rgba(138,125,255,.08) 42%, transparent 70%);
+      filter: blur(24px);
+    }
+
+    .phone {
+      position: relative;
+      width: min(382px, 88vw);
+      height: 650px;
+      padding: 10px;
+      border-radius: 43px;
+      background: linear-gradient(145deg, #263745, #070c11 38%, #15232d 75%, #314350);
+      box-shadow: 0 44px 100px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.18);
+      transform: rotateY(-5deg) rotateX(1.4deg);
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      z-index: 10;
+      top: 16px;
+      left: 50%;
+      width: 96px;
+      height: 22px;
+      transform: translateX(-50%);
+      border-radius: 99px;
+      background: #020508;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,.06);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 34px;
+      background: #071018;
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .app-header {
+      height: 63px;
+      padding: 18px 14px 7px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(180deg, #071018 78%, rgba(7,16,24,.90));
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .app-menu, .app-bell {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: white;
+      background: rgba(255,255,255,.04);
+    }
+    .app-menu svg, .app-bell svg { width: 16px; height: 16px; }
+    .app-brand { flex: 1; min-width: 0; }
+    .app-brand strong {
+      display: block;
+      color: white;
+      font-size: 21px;
+      line-height: 1;
+      letter-spacing: -.6px;
+    }
+    .app-brand strong em { color: var(--primary-bright); font-style: normal; }
+    .app-brand small {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255,255,255,.76);
+      font-size: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .avatar {
+      width: 29px;
+      height: 29px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(18,216,214,.28), rgba(138,125,255,.28));
+      border: 1px solid rgba(255,255,255,.14);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .map-preview {
+      position: relative;
+      height: 242px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 68% 34%, rgba(41,227,138,.09), transparent 16%),
+        linear-gradient(27deg, transparent 44%, rgba(50,85,101,.20) 45%, rgba(50,85,101,.20) 47%, transparent 48%),
+        linear-gradient(-18deg, transparent 36%, rgba(50,85,101,.18) 37%, rgba(50,85,101,.18) 39%, transparent 40%),
+        #0c1922;
+    }
+    .map-preview::before {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      opacity: .48;
+      background-image:
+        linear-gradient(16deg, transparent 47%, rgba(111,146,160,.22) 48%, rgba(111,146,160,.22) 49%, transparent 50%),
+        linear-gradient(86deg, transparent 48%, rgba(111,146,160,.16) 49%, rgba(111,146,160,.16) 50%, transparent 51%);
+      background-size: 76px 76px, 112px 112px;
+      transform: rotate(-4deg);
+    }
+    .river-path {
+      position: absolute;
+      left: -24px;
+      top: 34px;
+      width: 420px;
+      height: 190px;
+      border-radius: 50%;
+      border: 16px solid rgba(0,184,217,.27);
+      transform: rotate(-8deg);
+      filter: drop-shadow(0 0 12px rgba(0,184,217,.18));
+    }
+    .map-top-row {
+      position: absolute;
+      z-index: 4;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+    .live-chip, .map-chip {
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border-radius: 10px;
+      background: rgba(7,16,24,.84);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .live-chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+    .map-chip { margin-left: auto; color: #bfeef4; }
+
+    .pin {
+      position: absolute;
+      z-index: 3;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50% 50% 50% 8px;
+      transform: rotate(-45deg);
+      border: 2px solid rgba(255,255,255,.78);
+      box-shadow: 0 8px 18px rgba(0,0,0,.28);
+    }
+    .pin svg { width: 14px; height: 14px; transform: rotate(45deg); color: white; }
+    .pin-water { left: 63px; top: 83px; background: var(--primary); }
+    .pin-report { right: 62px; top: 112px; background: var(--warning); }
+    .pin-catch { right: 114px; bottom: 34px; background: var(--good); }
+    .pin-ai { left: 142px; bottom: 35px; background: var(--ai); }
+
+    .map-controls {
+      position: absolute;
+      z-index: 5;
+      right: 10px;
+      bottom: 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .map-control {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(7,16,24,.84);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--primary-bright);
+      backdrop-filter: blur(10px);
+    }
+    .map-control svg { width: 15px; height: 15px; }
+
+    .app-feed {
+      padding: 10px 10px 67px;
+      display: grid;
+      gap: 8px;
+      background: linear-gradient(180deg, #08131c, #071018);
+    }
+    .app-card {
+      padding: 10px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(23,33,45,.96), rgba(15,27,37,.96));
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    .app-card-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 7px;
+      color: #d8e7ef;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .app-card-head svg { width: 14px; height: 14px; color: var(--primary-bright); }
+    .water-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .water-level strong { display: block; font-size: 20px; line-height: 1; }
+    .water-level small { color: var(--muted); font-size: 8px; }
+    .sparkline { height: 36px; width: 100%; }
+    .trend { text-align: right; }
+    .trend strong { display: block; color: var(--good); font-size: 12px; }
+    .trend small { color: var(--muted); font-size: 7px; }
+    .weather-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    .metric {
+      padding: 6px 3px;
+      text-align: center;
+      border-radius: 9px;
+      background: rgba(255,255,255,.035);
+    }
+    .metric b { display: block; font-size: 10px; }
+    .metric span { display: block; color: var(--subtle); font-size: 6.8px; }
+    .score-row { display: flex; align-items: center; gap: 10px; }
+    .score-ring {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary-bright) 0 79%, rgba(255,255,255,.08) 79% 100%);
+      box-shadow: 0 0 24px rgba(18,216,214,.12);
+    }
+    .score-ring::before {
+      content: "79";
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .score-copy b { display: block; font-size: 10px; }
+    .score-copy span { display: block; color: var(--muted); font-size: 7.5px; line-height: 1.35; }
+
+    .app-nav {
+      position: absolute;
+      z-index: 8;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 59px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      padding-bottom: 3px;
+      background: rgba(7,16,24,.96);
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+    }
+    .app-nav-item {
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      color: #708898;
+      font-size: 7px;
+      font-weight: 700;
+    }
+    .app-nav-item svg { width: 17px; height: 17px; }
+    .app-nav-item.active { color: var(--primary-bright); }
+    .app-nav-plus {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      margin: -18px auto 0;
+      border-radius: 14px;
+      color: #001217;
+      background: linear-gradient(135deg, var(--primary-bright), var(--primary));
+      box-shadow: 0 8px 22px rgba(0,184,217,.30);
+    }
+    .app-nav-plus svg { width: 19px; height: 19px; }
+
+    .float-card {
+      position: absolute;
+      z-index: 7;
+      width: 175px;
+      padding: 12px;
+      border-radius: 16px;
+      color: white;
+      background: rgba(17,28,38,.88);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 46px rgba(0,0,0,.32);
+      backdrop-filter: blur(16px);
+    }
+    .float-card strong { display: block; font-size: 11px; }
+    .float-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; line-height: 1.35; }
+    .float-card-left { left: -58px; top: 120px; }
+    .float-card-right { right: -74px; bottom: 120px; }
+    .float-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 7px;
+      color: var(--primary-bright);
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .float-card-right .float-label { color: var(--ai); }
+
+    .trust-strip {
+      padding: 22px 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.018);
+    }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .trust-item { display: flex; align-items: center; gap: 11px; color: #b6c8d4; font-size: 13px; }
+    .trust-icon {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      color: var(--primary-bright);
+      background: var(--primary-soft);
+      border: 1px solid rgba(18,216,214,.18);
+    }
+    .trust-icon svg { width: 18px; height: 18px; }
+    .trust-item b { display: block; color: white; font-size: 13px; }
+    .trust-item span { display: block; color: var(--muted); font-size: 11px; }
+
+    section { padding: 96px 0; }
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 42px;
+    }
+    .section-kicker {
+      margin-bottom: 12px;
+      color: var(--primary-bright);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin-bottom: 16px;
+      font-size: clamp(34px, 4.5vw, 56px);
+      line-height: 1.06;
+      letter-spacing: -2px;
+      font-weight: 900;
+    }
+    .section-head p {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .feature-card {
+      position: relative;
+      min-height: 250px;
+      padding: 24px;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, rgba(23,33,45,.92), rgba(13,24,33,.92));
+      border: 1px solid var(--line);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(18,216,214,.28);
+      box-shadow: 0 24px 48px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .feature-card::after {
+      content: "";
+      position: absolute;
+      right: -72px;
+      bottom: -72px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--feature-glow, rgba(18,216,214,.14)), transparent 70%);
+    }
+    .feature-card.ai-card { --feature-glow: rgba(138,125,255,.20); }
+    .feature-card.community-card { --feature-glow: rgba(255,200,87,.17); }
+    .feature-card.catch-card { --feature-glow: rgba(41,227,138,.16); }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      color: var(--card-accent, var(--primary-bright));
+      background: color-mix(in srgb, var(--card-accent, var(--primary-bright)) 13%, transparent);
+      border: 1px solid color-mix(in srgb, var(--card-accent, var(--primary-bright)) 24%, transparent);
+    }
+    .feature-icon svg { width: 23px; height: 23px; }
+    .feature-card h3 { margin-bottom: 9px; font-size: 20px; letter-spacing: -.3px; }
+    .feature-card p { color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .feature-meta {
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
+      color: var(--subtle);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .split-section {
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .split-section.reverse { grid-template-columns: 1.08fr .92fr; }
+    .split-section.reverse .visual-panel { order: 2; }
+    .split-section.reverse .split-copy { order: 1; }
+
+    .visual-panel {
+      position: relative;
+      min-height: 510px;
+      padding: 28px;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(18,216,214,.12), transparent 34%),
+        linear-gradient(145deg, rgba(23,33,45,.97), rgba(8,20,29,.97));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .visual-panel.ai-panel {
+      background:
+        radial-gradient(circle at 72% 12%, rgba(138,125,255,.20), transparent 35%),
+        radial-gradient(circle at 10% 90%, rgba(18,216,214,.10), transparent 32%),
+        linear-gradient(145deg, rgba(23,33,45,.97), rgba(8,20,29,.97));
+    }
+    .panel-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #c6fbff;
+      background: rgba(0,184,217,.09);
+      border: 1px solid rgba(18,216,214,.20);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .panel-label.ai-label { color: #dcd7ff; background: rgba(138,125,255,.10); border-color: rgba(138,125,255,.22); }
+
+    .water-dashboard {
+      margin-top: 24px;
+      display: grid;
+      gap: 12px;
+    }
+    .dashboard-main {
+      padding: 22px;
+      border-radius: 20px;
+      background: rgba(6,15,23,.62);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .station-row { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+    .station-row h3 { margin-bottom: 4px; font-size: 21px; }
+    .station-row p { margin: 0; color: var(--muted); font-size: 12px; }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      color: #bfffe2;
+      background: rgba(41,227,138,.09);
+      border: 1px solid rgba(41,227,138,.24);
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .level-big {
+      margin-top: 20px;
+      display: flex;
+      align-items: end;
+      gap: 14px;
+    }
+    .level-big strong { font-size: 58px; line-height: .9; letter-spacing: -3px; }
+    .level-big span { color: var(--muted); font-size: 18px; padding-bottom: 5px; }
+    .delta-pill {
+      margin-left: auto;
+      padding: 8px 10px;
+      border-radius: 11px;
+      color: #bfffe2;
+      background: rgba(41,227,138,.10);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .chart-large { margin-top: 20px; width: 100%; height: 145px; }
+    .chart-labels { display: flex; justify-content: space-between; color: var(--subtle); font-size: 10px; }
+    .source-row {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .mini-panels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .mini-panel {
+      padding: 13px;
+      border-radius: 15px;
+      background: rgba(6,15,23,.46);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .mini-panel span { display: block; color: var(--muted); font-size: 10px; }
+    .mini-panel b { display: block; margin-top: 3px; font-size: 16px; }
+
+    .split-copy .section-kicker { margin-bottom: 12px; }
+    .split-copy h2 { margin-bottom: 18px; }
+    .split-copy > p { color: var(--muted); font-size: 17px; line-height: 1.72; }
+    .benefit-list { margin: 27px 0 0; padding: 0; list-style: none; display: grid; gap: 15px; }
+    .benefit-list li { display: flex; align-items: flex-start; gap: 11px; color: #c7d5de; }
+    .benefit-list svg { width: 19px; height: 19px; flex: 0 0 auto; margin-top: 2px; color: var(--good); }
+    .benefit-list strong { color: white; }
+
+    .fluvi-orbit {
+      position: relative;
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+    }
+    .orbit-ring {
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      border: 1px solid rgba(138,125,255,.19);
+      box-shadow: inset 0 0 60px rgba(138,125,255,.05);
+    }
+    .orbit-ring::before,
+    .orbit-ring::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(18,216,214,.14);
+    }
+    .orbit-ring::before { inset: 34px; }
+    .orbit-ring::after { inset: 74px; }
+    .fluvi-core {
+      position: relative;
+      z-index: 2;
+      width: 158px;
+      height: 158px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.22), transparent 18%), linear-gradient(145deg, #8a7dff, #4b57c8 60%, #00b8d9);
+      box-shadow: 0 0 80px rgba(138,125,255,.28), 0 0 42px rgba(0,184,217,.18), inset 0 1px 0 rgba(255,255,255,.32);
+    }
+    .fluvi-core svg { width: 84px; height: 84px; color: white; }
+    .orbit-node {
+      position: absolute;
+      z-index: 3;
+      min-width: 126px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(7,16,24,.82);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: 0 12px 32px rgba(0,0,0,.25);
+      backdrop-filter: blur(12px);
+    }
+    .orbit-node b { display: block; font-size: 11px; }
+    .orbit-node span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .node-water { left: 10px; top: 87px; }
+    .node-weather { right: 8px; top: 72px; }
+    .node-community { left: 16px; bottom: 70px; }
+    .node-location { right: 10px; bottom: 64px; }
+    .ai-message {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      bottom: 2px;
+      width: min(420px, 90%);
+      padding: 14px 16px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: rgba(17,28,38,.92);
+      border: 1px solid rgba(138,125,255,.23);
+      box-shadow: 0 16px 42px rgba(0,0,0,.28);
+      color: #e2e7ed;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .ai-message b { color: #d9d2ff; }
+
+    .community-stage {
+      margin-top: 24px;
+      display: grid;
+      gap: 12px;
+    }
+    .report-card {
+      padding: 15px;
+      border-radius: 17px;
+      background: rgba(6,15,23,.60);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .report-head { display: flex; align-items: center; gap: 11px; }
+    .report-icon {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--report-color, var(--primary-bright));
+      background: color-mix(in srgb, var(--report-color, var(--primary-bright)) 13%, transparent);
+      border: 1px solid color-mix(in srgb, var(--report-color, var(--primary-bright)) 28%, transparent);
+    }
+    .report-icon svg { width: 20px; height: 20px; }
+    .report-title { flex: 1; }
+    .report-title b { display: block; font-size: 13px; }
+    .report-title span { color: var(--muted); font-size: 10px; }
+    .report-distance { color: var(--muted); font-size: 10px; }
+    .report-body { margin: 11px 0 0; color: #bacbd6; font-size: 11px; }
+    .report-actions { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+    .confirm-chip {
+      padding: 6px 9px;
+      border-radius: 9px;
+      color: #bfffe2;
+      background: rgba(41,227,138,.08);
+      border: 1px solid rgba(41,227,138,.18);
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .expiry { margin-left: auto; color: var(--subtle); font-size: 9px; }
+
+    .principles {
+      position: relative;
+      overflow: hidden;
+    }
+    .principles::before {
+      content: "";
+      position: absolute;
+      inset: 14% 0 auto;
+      height: 72%;
+      background: linear-gradient(90deg, transparent, rgba(0,184,217,.055), transparent);
+      transform: skewY(-5deg);
+      pointer-events: none;
+    }
+    .principle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .principle {
+      position: relative;
+      padding: 22px;
+      border-radius: 18px;
+      background: rgba(17,28,38,.68);
+      border: 1px solid var(--line);
+    }
+    .principle .number { color: var(--primary-bright); font-size: 11px; font-weight: 900; letter-spacing: .1em; }
+    .principle h3 { margin: 14px 0 8px; font-size: 17px; }
+    .principle p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .future-strip {
+      padding: 0 0 96px;
+    }
+    .future-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 28px;
+      padding: 28px 32px;
+      border-radius: 24px;
+      background: linear-gradient(120deg, rgba(138,125,255,.14), rgba(0,184,217,.10) 62%, rgba(17,28,38,.84));
+      border: 1px solid rgba(138,125,255,.22);
+    }
+    .future-card h3 { margin: 0 0 6px; font-size: 24px; }
+    .future-card p { margin: 0; color: var(--muted); }
+    .future-tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .future-tag {
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: #d9e6ed;
+      background: rgba(7,16,24,.45);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .beta-section { padding-top: 80px; }
+    .beta-shell {
+      position: relative;
+      display: grid;
+      grid-template-columns: .88fr 1.12fr;
+      gap: 42px;
+      padding: 44px;
+      overflow: hidden;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 0 0, rgba(18,216,214,.16), transparent 35%),
+        radial-gradient(circle at 100% 100%, rgba(138,125,255,.15), transparent 37%),
+        linear-gradient(145deg, rgba(23,33,45,.98), rgba(8,20,29,.98));
+      border: 1px solid rgba(18,216,214,.22);
+      box-shadow: var(--shadow);
+    }
+    .beta-copy h2 { margin-top: 17px; }
+    .beta-copy > p { color: var(--muted); font-size: 16px; }
+    .beta-limit {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 28px 0;
+      padding: 15px;
+      border-radius: 17px;
+      background: rgba(6,15,23,.56);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .beta-number {
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 18px;
+      color: #001217;
+      background: linear-gradient(135deg, var(--primary-bright), var(--primary));
+      font-size: 23px;
+      font-weight: 900;
+      box-shadow: 0 10px 28px rgba(0,184,217,.24);
+    }
+    .beta-limit b { display: block; }
+    .beta-limit span { display: block; color: var(--muted); font-size: 12px; }
+    .tester-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+    .tester-list li { display: flex; align-items: start; gap: 10px; color: #c5d5de; font-size: 14px; }
+    .tester-list svg { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 2px; color: var(--good); }
+
+    .waitlist-form {
+      padding: 24px;
+      border-radius: 23px;
+      background: rgba(6,15,23,.66);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-field { display: grid; gap: 7px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { color: #d8e6ed; font-size: 12px; font-weight: 700; }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(164,200,221,.16);
+      outline: 0;
+      color: white;
+      background: rgba(17,28,38,.88);
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .form-field textarea { min-height: 92px; resize: vertical; }
+    .form-field input::placeholder,
+    .form-field textarea::placeholder { color: #657c8d; }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,184,217,.12);
+      background: rgba(18,31,42,.96);
+    }
+    .form-field select option { background: #111c26; color: white; }
+    .consent {
+      margin: 15px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .consent input { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 1px; accent-color: var(--primary); }
+    .form-actions { display: flex; align-items: center; gap: 13px; }
+    .form-actions .btn { flex: 1; }
+    .form-note { color: var(--subtle); font-size: 10px; }
+    .form-status {
+      display: none;
+      margin-top: 13px;
+      padding: 12px 13px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .form-status.show { display: block; }
+    .form-status.success { color: #bfffe2; background: rgba(41,227,138,.08); border: 1px solid rgba(41,227,138,.20); }
+    .form-status.error { color: #ffd1d1; background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.20); }
+    .form-status.info { color: #c3f8ff; background: rgba(0,184,217,.08); border: 1px solid rgba(0,184,217,.20); }
+
+    .contact-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #c8f9ff;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .contact-inline:hover,
+    .contact-inline:focus-visible {
+      color: var(--primary-bright);
+      outline: none;
+    }
+    .beta-contact {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .beta-contact a {
+      color: #c8f9ff;
+      font-weight: 800;
+    }
+    .beta-contact a:hover,
+    .beta-contact a:focus-visible {
+      color: var(--primary-bright);
+      outline: none;
+    }
+    .honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+
+    .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    details {
+      border-radius: 16px;
+      background: rgba(17,28,38,.70);
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    summary {
+      position: relative;
+      padding: 18px 48px 18px 18px;
+      list-style: none;
+      cursor: pointer;
+      color: #eef8fc;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+";
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary-bright);
+      font-size: 22px;
+      font-weight: 400;
+    }
+    details[open] summary::after { content: "−"; }
+    details p { padding: 0 18px 18px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+    footer {
+      padding: 34px 0 calc(34px + env(safe-area-inset-bottom));
+      border-top: 1px solid rgba(255,255,255,.07);
+      background: rgba(3,8,12,.40);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 30px;
+    }
+    .footer-brand p { max-width: 560px; margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+    .footer-meta { text-align: right; color: var(--subtle); font-size: 11px; }
+    .footer-meta a { color: #b6cbd7; }
+    .footer-meta a:hover { color: var(--primary-bright); }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1060px) {
+      .nav-links { display: none; }
+      .menu-toggle { display: grid; place-items: center; }
+      .nav-links.mobile-open {
+        position: absolute;
+        top: calc(100% + 1px);
+        left: 20px;
+        right: 20px;
+        display: grid;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(7,16,24,.97);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .nav-links.mobile-open a { padding: 12px; }
+      .hero-grid { grid-template-columns: 1fr .9fr; gap: 34px; }
+      .float-card-left { left: -16px; }
+      .float-card-right { right: -18px; }
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+      .split-section, .split-section.reverse { grid-template-columns: 1fr 1fr; gap: 36px; }
+      .principle-grid { grid-template-columns: repeat(2, 1fr); }
+      .beta-shell { grid-template-columns: 1fr 1.15fr; padding: 32px; }
+    }
+
+    @media (max-width: 860px) {
+      .hero { padding-top: 58px; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-copy { text-align: center; }
+      .hero-copy .eyebrow { margin-inline: auto; }
+      .hero-lead { margin-inline: auto; }
+      .hero-actions, .hero-proof { justify-content: center; }
+      .device-stage { min-height: 690px; }
+      .phone { transform: none; }
+      .trust-grid { grid-template-columns: repeat(2, 1fr); }
+      .split-section, .split-section.reverse { grid-template-columns: 1fr; }
+      .split-section.reverse .visual-panel, .split-section.reverse .split-copy { order: initial; }
+      .visual-panel { min-height: auto; }
+      .future-card { grid-template-columns: 1fr; }
+      .future-tags { justify-content: flex-start; }
+      .beta-shell { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      :root { --header-h: 67px; }
+      .container { width: min(calc(100% - 24px), var(--max)); }
+      .site-header .container { width: min(calc(100% - 20px), var(--max)); }
+      .nav { gap: 8px; }
+      .brand-mark { width: 36px; height: 36px; border-radius: 12px; }
+      .brand-copy small { display: none; }
+      .official-wordmark { height: 21px; }
+      .wordmark-fallback { font-size: 21px; }
+      .nav-actions .btn { display: none; }
+      .lang-switch button { min-width: 33px; height: 30px; }
+      .hero { padding: 46px 0 54px; }
+      h1 { font-size: clamp(43px, 13vw, 62px); letter-spacing: -2.3px; }
+      .hero-lead { font-size: 16px; }
+      .hero-actions { display: grid; }
+      .hero-actions .btn { width: 100%; }
+      .device-stage { min-height: 610px; }
+      .phone { width: min(345px, 94vw); height: 596px; border-radius: 38px; }
+      .screen { border-radius: 30px; }
+      .map-preview { height: 215px; }
+      .app-card { padding: 8px; }
+      .float-card { display: none; }
+      .trust-grid { grid-template-columns: 1fr; gap: 12px; }
+      section { padding: 72px 0; }
+      .section-head { margin-bottom: 30px; }
+      h2 { font-size: 37px; letter-spacing: -1.4px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .feature-card { min-height: 225px; padding: 20px; }
+      .feature-meta { left: 20px; }
+      .visual-panel { padding: 18px; border-radius: 23px; }
+      .station-row { align-items: center; }
+      .level-big strong { font-size: 48px; }
+      .mini-panels { grid-template-columns: 1fr 1fr; }
+      .mini-panels .mini-panel:last-child { grid-column: 1 / -1; }
+      .fluvi-orbit { min-height: 470px; }
+      .orbit-ring { width: 270px; height: 270px; }
+      .fluvi-core { width: 132px; height: 132px; }
+      .fluvi-core svg { width: 70px; height: 70px; }
+      .orbit-node { min-width: 105px; padding: 8px 9px; }
+      .node-water { left: -5px; top: 100px; }
+      .node-weather { right: -7px; top: 92px; }
+      .node-community { left: -2px; bottom: 96px; }
+      .node-location { right: -4px; bottom: 89px; }
+      .principle-grid { grid-template-columns: 1fr; }
+      .future-card { padding: 24px; }
+      .beta-shell { padding: 22px; border-radius: 24px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: auto; }
+      .form-actions { display: grid; }
+      .faq-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-meta { text-align: left; }
+    }
+
+    @media (max-width: 380px) {
+      .phone { height: 570px; }
+      .app-feed { padding-inline: 8px; }
+      .weather-strip { gap: 3px; }
+      .metric { padding-inline: 1px; }
+      .orbit-node span { display: none; }
+      .orbit-node { min-width: 94px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-ro="Sari la conținut" data-en="Skip to content">Sari la conținut</a>
+
+  <svg aria-hidden="true" width="0" height="0" style="position:absolute">
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8.5c3.1 0 3.1-2 6.2-2s3.1 2 6.2 2 3.1-2 6.2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 13c3.1 0 3.1-2 6.2-2s3.1 2 6.2 2 3.1-2 6.2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 17.5c3.1 0 3.1-2 6.2-2s3.1 2 6.2 2 3.1-2 6.2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 3v15M15 6v15" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 2S5 9.2 5 15a7 7 0 0 0 14 0c0-5.8-7-13-7-13Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.6 16.5c.7 1.5 2 2.2 3.7 2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M6.2 18a4.2 4.2 0 1 1 .8-8.3A6 6 0 0 1 18.5 11 3.5 3.5 0 1 1 18 18H6.2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ai" viewBox="0 0 24 24"><path d="M9 3h6l1 3 3 1v6l-3 1-1 3H9l-1-3-3-1V7l3-1 1-3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="10" cy="10" r="1" fill="currentColor"/><circle cx="14" cy="10" r="1" fill="currentColor"/><path d="M9.5 13.5c1.6 1.2 3.4 1.2 5 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-fish" viewBox="0 0 24 24"><path d="M20 12c-3.2-4.6-8-6.1-12-3.1L3 6v12l5-2.9c4 3 8.8 1.5 12-3.1Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="16" cy="11" r="1" fill="currentColor"/><path d="M8 9v6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6l8-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-offline" viewBox="0 0 24 24"><path d="M5 16.5a4.5 4.5 0 0 1 .8-8.9A6.5 6.5 0 0 1 18 10a3.5 3.5 0 0 1 .5 6.9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m4 4 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-location" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9H3v-9Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M5 4h14v16H5z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="FluviAI">
+        <span class="brand-mark" aria-hidden="true"><svg><use href="#i-wave"></use></svg></span>
+        <span class="brand-copy">
+          <img class="official-wordmark" src="fluviai_wordmark.png" alt="FluviAI" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+          <span class="wordmark-fallback" hidden>Fluvi<b>AI</b></span>
+          <small data-ro="Acolo unde pasiunea întâlnește firul apei." data-en="Where passion meets the flow of water.">Acolo unde pasiunea întâlnește firul apei.</small>
+        </span>
+      </a>
+
+      <nav class="nav-links" id="navLinks" aria-label="Navigație principală">
+        <a href="#features" data-ro="Funcții" data-en="Features">Funcții</a>
+        <a href="#fluvi" data-ro="Fluvi" data-en="Fluvi">Fluvi</a>
+        <a href="#community" data-ro="Comunitate" data-en="Community">Comunitate</a>
+        <a href="#principles" data-ro="Principii" data-en="Principles">Principii</a>
+        <a href="#faq" data-ro="Întrebări" data-en="FAQ">Întrebări</a>
+        <a href="mailto:contact@fluviai.com" data-ro="Contact" data-en="Contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="active" data-lang="ro" aria-pressed="true">RO</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <a class="btn btn-primary" href="#waitlist">
+          <span data-ro="Intră în beta" data-en="Join the beta">Intră în beta</span>
+          <svg width="17" height="17" aria-hidden="true"><use href="#i-arrow"></use></svg>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="Deschide meniul" aria-expanded="false" aria-controls="navLinks">
+          <svg width="19" height="19"><use href="#i-menu"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <span class="eyebrow"><i class="pulse-dot"></i><span data-ro="Beta privată România · 100 de locuri" data-en="Private Romania beta · 100 places">Beta privată România · 100 de locuri</span></span>
+          <h1 class="gradient-text" data-ro="Înțelege apa. Citește vremea. Ascultă comunitatea." data-en="Understand the water. Read the weather. Hear the community.">Înțelege apa. Citește vremea. Ascultă comunitatea.</h1>
+          <p class="hero-lead" data-ro="FluviAI va reuni harta, nivelurile reale ale apei, vremea, rapoartele live și inteligența explicabilă într-un singur loc — ca să înțelegi rapid dacă merită să pleci, unde și de ce." data-en="FluviAI brings maps, real water levels, weather, live reports and explainable intelligence into one place — so you can quickly understand whether it is worth going, where, and why.">
+            FluviAI va reuni <strong>harta, nivelurile reale ale apei, vremea, rapoartele live și inteligența explicabilă</strong> într-un singur loc — ca să înțelegi rapid dacă merită să pleci, unde și de ce.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#waitlist"><span data-ro="Rezervă un loc beta" data-en="Reserve a beta place">Rezervă un loc beta</span><svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
+            <a class="btn btn-secondary" href="#features"><span data-ro="Descoperă FluviAI" data-en="Discover FluviAI">Descoperă FluviAI</span></a>
+          </div>
+          <div class="hero-proof" aria-label="Principii principale">
+            <span><svg><use href="#i-check"></use></svg><span data-ro="Date reale, fără trenduri inventate" data-en="Real data, no invented trends">Date reale, fără trenduri inventate</span></span>
+            <span><svg><use href="#i-check"></use></svg><span data-ro="RO / EN" data-en="RO / EN">RO / EN</span></span>
+            <span><svg><use href="#i-check"></use></svg><span data-ro="Privacy by design" data-en="Privacy by design">Privacy by design</span></span>
+          </div>
+        </div>
+
+        <div class="device-stage reveal" aria-label="Previzualizare aplicație FluviAI">
+          <div class="device-glow"></div>
+          <div class="phone">
+            <div class="screen">
+              <div class="app-header">
+                <span class="app-menu"><svg><use href="#i-menu"></use></svg></span>
+                <div class="app-brand"><strong>Fluvi<em>AI</em></strong><small data-ro="Acolo unde pasiunea întâlnește firul apei." data-en="Where passion meets the flow of water.">Acolo unde pasiunea întâlnește firul apei.</small></div>
+                <span class="app-bell"><svg><use href="#i-bell"></use></svg></span>
+                <span class="avatar">BS</span>
+              </div>
+
+              <div class="map-preview">
+                <div class="river-path"></div>
+                <div class="map-top-row"><span class="live-chip"><i></i> LIVE</span><span class="map-chip" data-ro="Brăila · 5 km" data-en="Brăila · 5 km">Brăila · 5 km</span></div>
+                <span class="pin pin-water"><svg><use href="#i-water"></use></svg></span>
+                <span class="pin pin-report"><svg><use href="#i-report"></use></svg></span>
+                <span class="pin pin-catch"><svg><use href="#i-fish"></use></svg></span>
+                <span class="pin pin-ai"><svg><use href="#i-ai"></use></svg></span>
+                <div class="map-controls"><span class="map-control"><svg><use href="#i-location"></use></svg></span><span class="map-control"><svg><use href="#i-layers"></use></svg></span></div>
+              </div>
+
+              <div class="app-feed">
+                <div class="app-card">
+                  <div class="app-card-head"><svg><use href="#i-water"></use></svg><span data-ro="Nivelul apei · Brăila" data-en="Water level · Brăila">Nivelul apei · Brăila</span></div>
+                  <div class="water-row">
+                    <div class="water-level"><strong>178</strong><small>cm</small></div>
+                    <svg class="sparkline" viewBox="0 0 150 40" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="miniFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12d8d6" stop-opacity=".34"/><stop offset="1" stop-color="#12d8d6" stop-opacity="0"/></linearGradient></defs><path d="M0 29 C22 25,30 28,45 21 S73 16,90 18 S118 12,150 8 L150 40 L0 40Z" fill="url(#miniFill)"/><path d="M0 29 C22 25,30 28,45 21 S73 16,90 18 S118 12,150 8" fill="none" stroke="#12d8d6" stroke-width="2"/></svg>
+                    <div class="trend"><strong>+8 cm</strong><small data-ro="în 24h" data-en="in 24h">în 24h</small></div>
+                  </div>
+                </div>
+
+                <div class="app-card">
+                  <div class="app-card-head"><svg><use href="#i-cloud"></use></svg><span data-ro="Condiții meteo" data-en="Weather conditions">Condiții meteo</span></div>
+                  <div class="weather-strip"><div class="metric"><b>18°</b><span data-ro="Aer" data-en="Air">Aer</span></div><div class="metric"><b>12 km/h</b><span data-ro="Vânt" data-en="Wind">Vânt</span></div><div class="metric"><b>1014</b><span>hPa</span></div><div class="metric"><b>62%</b><span data-ro="Umid." data-en="Humidity">Umid.</span></div><div class="metric"><b>06:11</b><span data-ro="Răsărit" data-en="Sunrise">Răsărit</span></div></div>
+                </div>
+
+                <div class="app-card">
+                  <div class="score-row"><span class="score-ring"></span><div class="score-copy"><b data-ro="FluviScore · Condiții bune" data-en="FluviScore · Good conditions">FluviScore · Condiții bune</b><span data-ro="Apa urcă lent, presiunea este stabilă, iar activitatea comunității a crescut." data-en="Water is rising slowly, pressure is stable, and community activity has increased.">Apa urcă lent, presiunea este stabilă, iar activitatea comunității a crescut.</span></div></div>
+                </div>
+              </div>
+
+              <div class="app-nav">
+                <span class="app-nav-item active"><svg><use href="#i-home"></use></svg><span data-ro="Acasă" data-en="Home">Acasă</span></span>
+                <span class="app-nav-item"><svg><use href="#i-map"></use></svg><span data-ro="Hartă" data-en="Map">Hartă</span></span>
+                <span class="app-nav-item"><span class="app-nav-plus"><svg><use href="#i-plus"></use></svg></span></span>
+                <span class="app-nav-item"><svg><use href="#i-report"></use></svg><span data-ro="Rapoarte" data-en="Reports">Rapoarte</span></span>
+                <span class="app-nav-item"><svg><use href="#i-star"></use></svg><span data-ro="Favorite" data-en="Favorites">Favorite</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="float-card float-card-left"><span class="float-label"><svg width="13" height="13"><use href="#i-water"></use></svg><span data-ro="Apă reală" data-en="Real water data">Apă reală</span></span><strong data-ro="Trend, delta și istoric" data-en="Trend, delta and history">Trend, delta și istoric</strong><span data-ro="Sursă, prospețime și fallback clar — fără istoric fabricat." data-en="Clear source, freshness and fallback — no fabricated history.">Sursă, prospețime și fallback clar — fără istoric fabricat.</span></div>
+          <div class="float-card float-card-right"><span class="float-label"><svg width="13" height="13"><use href="#i-ai"></use></svg><span data-ro="Fluvi explică" data-en="Fluvi explains">Fluvi explică</span></span><strong data-ro="De ce merită sau nu" data-en="Why it may be worth it">De ce merită sau nu</strong><span data-ro="Context inteligent construit din semnale reale, nu din certitudini inventate." data-en="Smart context built from real signals, not invented certainty.">Context inteligent construit din semnale reale, nu din certitudini inventate.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust-strip">
+      <div class="container trust-grid">
+        <div class="trust-item"><span class="trust-icon"><svg><use href="#i-water"></use></svg></span><span><b data-ro="Niveluri reale" data-en="Real water levels">Niveluri reale</b><span data-ro="Surse oficiale și validate" data-en="Official and validated sources">Surse oficiale și validate</span></span></div>
+        <div class="trust-item"><span class="trust-icon"><svg><use href="#i-shield"></use></svg></span><span><b data-ro="Privacy by design" data-en="Privacy by design">Privacy by design</b><span data-ro="Tu controlezi locația" data-en="You control location sharing">Tu controlezi locația</span></span></div>
+        <div class="trust-item"><span class="trust-icon"><svg><use href="#i-users"></use></svg></span><span><b data-ro="Comunitate utilă" data-en="Useful community">Comunitate utilă</b><span data-ro="Rapoarte structurate și moderate" data-en="Structured, moderated reports">Rapoarte structurate și moderate</span></span></div>
+        <div class="trust-item"><span class="trust-icon"><svg><use href="#i-ai"></use></svg></span><span><b data-ro="AI explicabil" data-en="Explainable AI">AI explicabil</b><span data-ro="Pescarul decide întotdeauna" data-en="The angler always decides">Pescarul decide întotdeauna</span></span></div>
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker" data-ro="Tot ce contează, într-un singur loc" data-en="Everything that matters, in one place">Tot ce contează, într-un singur loc</div>
+          <h2 data-ro="O decizie de pescuit construită din context, nu din presupuneri." data-en="A fishing decision built from context, not guesswork.">O decizie de pescuit construită din context, nu din presupuneri.</h2>
+          <p data-ro="FluviAI este gândită ca „Waze-ul pescarilor de ape sălbatice”: hartă, apă, vreme, comunitate, capturi și explicații inteligente care se completează reciproc." data-en="FluviAI is designed as a ‘Waze for wild-water anglers’: map, water, weather, community, catches and intelligent explanations that reinforce one another.">FluviAI este gândită ca „Waze-ul pescarilor de ape sălbatice”: hartă, apă, vreme, comunitate, capturi și explicații inteligente care se completează reciproc.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal" style="--card-accent:#12d8d6"><span class="feature-icon"><svg><use href="#i-map"></use></svg></span><h3 data-ro="Hartă premium" data-en="Premium map">Hartă premium</h3><p data-ro="Căutare, GPS, stații de măsurare, rapoarte, capturi, favorite, filtre și straturi într-o experiență clară, inclusiv landscape edge-to-edge." data-en="Search, GPS, monitoring stations, reports, catches, favorites, filters and layers in a clear experience, including edge-to-edge landscape.">Căutare, GPS, stații de măsurare, rapoarte, capturi, favorite, filtre și straturi într-o experiență clară, inclusiv landscape edge-to-edge.</p><span class="feature-meta" data-ro="Context local + explorare completă" data-en="Local context + full exploration">Context local + explorare completă</span></article>
+
+          <article class="feature-card reveal" style="--card-accent:#00b8d9"><span class="feature-icon"><svg><use href="#i-water"></use></svg></span><h3 data-ro="Nivelul apei" data-en="Water level">Nivelul apei</h3><p data-ro="Cotă, schimbare în 24h, trend, istoric, sursă și prospețime. FluviAI separă datele oficiale, fallbackul și stările offline fără a inventa valori." data-en="Level, 24h change, trend, history, source and freshness. FluviAI separates official data, fallback and offline states without inventing values.">Cotă, schimbare în 24h, trend, istoric, sursă și prospețime. FluviAI separă datele oficiale, fallbackul și stările offline fără a inventa valori.</p><span class="feature-meta" data-ro="Dunăre + extindere spre râuri și lacuri" data-en="Danube + expansion to rivers and lakes">Dunăre + extindere spre râuri și lacuri</span></article>
+
+          <article class="feature-card reveal" style="--card-accent:#ffc857"><span class="feature-icon"><svg><use href="#i-cloud"></use></svg></span><h3 data-ro="Vreme și solunar" data-en="Weather and solunar">Vreme și solunar</h3><p data-ro="Temperatură, condiție, vânt și direcție, presiune, precipitații, umiditate, răsărit, apus și context lunar — prezentate pentru decizii rapide în teren." data-en="Temperature, conditions, wind and direction, pressure, precipitation, humidity, sunrise, sunset and lunar context — presented for quick field decisions.">Temperatură, condiție, vânt și direcție, presiune, precipitații, umiditate, răsărit, apus și context lunar — prezentate pentru decizii rapide în teren.</p><span class="feature-meta" data-ro="Date Open-Meteo + cache inteligent" data-en="Open-Meteo data + smart cache">Date Open-Meteo + cache inteligent</span></article>
+
+          <article class="feature-card ai-card reveal" style="--card-accent:#8a7dff"><span class="feature-icon"><svg><use href="#i-ai"></use></svg></span><h3 data-ro="Fluvi + FluviScore" data-en="Fluvi + FluviScore">Fluvi + FluviScore</h3><p data-ro="Un singur companion explicabil: combină factorii disponibili, arată nivelul de încredere și explică de ce condițiile sunt bune, slabe sau neclare." data-en="One explainable companion: it combines available factors, shows confidence and explains why conditions are good, poor or unclear.">Un singur companion explicabil: combină factorii disponibili, arată nivelul de încredere și explică de ce condițiile sunt bune, slabe sau neclare.</p><span class="feature-meta" data-ro="AI explică — pescarul decide" data-en="AI explains — the angler decides">AI explică — pescarul decide</span></article>
+
+          <article class="feature-card community-card reveal" style="--card-accent:#ffc857"><span class="feature-icon"><svg><use href="#i-users"></use></svg></span><h3 data-ro="Rapoarte live" data-en="Live reports">Rapoarte live</h3><p data-ro="Activitate, claritatea apei, curent, acces, bărci, braconaj, furt și alte situații reale — structurate, confirmabile și moderate pentru utilitate." data-en="Activity, water clarity, current, access, boats, poaching, theft and other real situations — structured, confirmable and moderated for usefulness.">Activitate, claritatea apei, curent, acces, bărci, braconaj, furt și alte situații reale — structurate, confirmabile și moderate pentru utilitate.</p><span class="feature-meta" data-ro="Fotografie opțională · context real" data-en="Optional photo · real context">Fotografie opțională · context real</span></article>
+
+          <article class="feature-card catch-card reveal" style="--card-accent:#29e38a"><span class="feature-icon"><svg><use href="#i-camera"></use></svg></span><h3 data-ro="Capturi și jurnal" data-en="Catches and logbook">Capturi și jurnal</h3><p data-ro="Fotografie live, specie, greutate, lungime și control explicit asupra locației. Capturile personale și comunitare devin context, nu competiție toxică." data-en="Live photo, species, weight, length and explicit control over location. Personal and community catches become context, not toxic competition.">Fotografie live, specie, greutate, lungime și control explicit asupra locației. Capturile personale și comunitare devin context, nu competiție toxică.</p><span class="feature-meta" data-ro="Exact · aproximativ · ascuns" data-en="Exact · approximate · hidden">Exact · aproximativ · ascuns</span></article>
+
+          <article class="feature-card reveal" style="--card-accent:#29e38a"><span class="feature-icon"><svg><use href="#i-star"></use></svg></span><h3 data-ro="Favorite personale" data-en="Personal favorites">Favorite personale</h3><p data-ro="Stații, locuri, rapoarte și capturi salvate de tine. Urmărești doar ce contează, fără să încarci harta sau fluxul cu sute de elemente." data-en="Stations, places, reports and catches saved by you. Follow only what matters without flooding the map or feed with hundreds of items.">Stații, locuri, rapoarte și capturi salvate de tine. Urmărești doar ce contează, fără să încarci harta sau fluxul cu sute de elemente.</p><span class="feature-meta" data-ro="Un hub construit de utilizator" data-en="A user-curated hub">Un hub construit de utilizator</span></article>
+
+          <article class="feature-card reveal" style="--card-accent:#12d8d6"><span class="feature-icon"><svg><use href="#i-offline"></use></svg></span><h3 data-ro="Rapiditate și offline" data-en="Speed and offline">Rapiditate și offline</h3><p data-ro="Cache-first, last-known-good, request dedupe și stări clare pentru lipsa conexiunii. Datele valide rămân vizibile în loc să fie acoperite inutil de loading." data-en="Cache-first, last-known-good, request dedupe and clear no-connection states. Valid data stays visible instead of being unnecessarily covered by loading states.">Cache-first, last-known-good, request dedupe și stări clare pentru lipsa conexiunii. Datele valide rămân vizibile în loc să fie acoperite inutil de loading.</p><span class="feature-meta" data-ro="Performanța este o funcție" data-en="Performance is a feature">Performanța este o funcție</span></article>
+
+          <article class="feature-card reveal" style="--card-accent:#8a7dff"><span class="feature-icon"><svg><use href="#i-bell"></use></svg></span><h3 data-ro="Alerte care contează" data-en="Alerts that matter">Alerte care contează</h3><p data-ro="Schimbări importante ale apei, condiții relevante, activitate în favorite și siguranță — cu grijă la frecvență și fără notificări de umplutură." data-en="Important water changes, relevant conditions, activity in favorites and safety — with careful frequency and no filler notifications.">Schimbări importante ale apei, condiții relevante, activitate în favorite și siguranță — cu grijă la frecvență și fără notificări de umplutură.</p><span class="feature-meta" data-ro="Planificate pentru utilitate reală" data-en="Planned for real usefulness">Planificate pentru utilitate reală</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="water">
+      <div class="container split-section">
+        <div class="visual-panel reveal">
+          <span class="panel-label"><svg width="15" height="15"><use href="#i-water"></use></svg><span data-ro="Water Intelligence" data-en="Water Intelligence">Water Intelligence</span></span>
+          <div class="water-dashboard">
+            <div class="dashboard-main">
+              <div class="station-row"><div><h3 data-ro="Dunărea · Brăila" data-en="Danube · Brăila">Dunărea · Brăila</h3><p data-ro="Stație selectată automat după locație" data-en="Station selected automatically by location">Stație selectată automat după locație</p></div><span class="live-badge"><i class="pulse-dot"></i> LIVE</span></div>
+              <div class="level-big"><strong>178</strong><span>cm</span><span class="delta-pill">↑ +8 cm / 24h</span></div>
+              <svg class="chart-large" viewBox="0 0 520 150" preserveAspectRatio="none" aria-label="Grafic demonstrativ nivel apă"><defs><linearGradient id="waterFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12d8d6" stop-opacity=".30"/><stop offset="1" stop-color="#12d8d6" stop-opacity="0"/></linearGradient></defs><path d="M0 112 C45 103,67 108,103 88 S168 83,208 72 S278 63,320 66 S397 47,442 42 S490 30,520 22 L520 150 L0 150Z" fill="url(#waterFill)"/><path d="M0 112 C45 103,67 108,103 88 S168 83,208 72 S278 63,320 66 S397 47,442 42 S490 30,520 22" fill="none" stroke="#12d8d6" stroke-width="3" stroke-linecap="round"/></svg>
+              <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span data-ro="Acum" data-en="Now">Acum</span></div>
+              <div class="source-row"><span data-ro="Sursă: oficială / reconciliată" data-en="Source: official / reconciled">Sursă: oficială / reconciliată</span><span data-ro="Actualizat recent" data-en="Updated recently">Actualizat recent</span></div>
+            </div>
+            <div class="mini-panels"><div class="mini-panel"><span data-ro="Tendință" data-en="Trend">Tendință</span><b data-ro="Creștere lentă" data-en="Slow rise">Creștere lentă</b></div><div class="mini-panel"><span data-ro="Istoric" data-en="History">Istoric</span><b>1 / 3 / 7 / 30</b></div><div class="mini-panel"><span data-ro="Status" data-en="Status">Status</span><b data-ro="Date reale" data-en="Real data">Date reale</b></div></div>
+          </div>
+        </div>
+        <div class="split-copy reveal">
+          <div class="section-kicker" data-ro="Diferențiatorul FluviAI" data-en="The FluviAI differentiator">Diferențiatorul FluviAI</div>
+          <h2 data-ro="Apa nu este doar un număr. Este contextul unei partide." data-en="Water is not just a number. It is the context of a fishing session.">Apa nu este doar un număr. Este contextul unei partide.</h2>
+          <p data-ro="FluviAI pune schimbarea reală în centrul experienței: cât a urcat sau a scăzut apa, în ce interval, din ce sursă și cât de proaspătă este observația." data-en="FluviAI puts real change at the centre of the experience: how much the water rose or fell, over what period, from which source, and how fresh the observation is.">FluviAI pune schimbarea reală în centrul experienței: cât a urcat sau a scăzut apa, în ce interval, din ce sursă și cât de proaspătă este observația.</p>
+          <ul class="benefit-list">
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="23 de stații canonice pe Dunăre" data-en="23 canonical Danube stations">23 de stații canonice pe Dunăre</strong><br><span data-ro="Selecție automată după locație sau stație fixată de utilizator." data-en="Automatic selection by location or a station pinned by the user.">Selecție automată după locație sau stație fixată de utilizator.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Trend doar din observații compatibile" data-en="Trend only from compatible observations">Trend doar din observații compatibile</strong><br><span data-ro="Fără interpolări sau istoric inventat pentru a umple un grafic." data-en="No interpolation or fabricated history just to fill a chart.">Fără interpolări sau istoric inventat pentru a umple un grafic.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Pregătită pentru România extinsă" data-en="Ready for broader Romania">Pregătită pentru România extinsă</strong><br><span data-ro="Râuri, lacuri, acumulări, baraje și stații favorite — adăugate controlat." data-en="Rivers, lakes, reservoirs, dams and favorite stations — added in a controlled way.">Râuri, lacuri, acumulări, baraje și stații favorite — adăugate controlat.</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="fluvi">
+      <div class="container split-section reverse">
+        <div class="visual-panel ai-panel reveal">
+          <span class="panel-label ai-label"><svg width="15" height="15"><use href="#i-ai"></use></svg><span data-ro="Fluvi · pescarul tău inteligent" data-en="Fluvi · your intelligent angler">Fluvi · pescarul tău inteligent</span></span>
+          <div class="fluvi-orbit">
+            <div class="orbit-ring"></div>
+            <div class="fluvi-core"><svg><use href="#i-fish"></use></svg></div>
+            <div class="orbit-node node-water"><b data-ro="Apă" data-en="Water">Apă</b><span data-ro="trend · istoric" data-en="trend · history">trend · istoric</span></div>
+            <div class="orbit-node node-weather"><b data-ro="Vreme" data-en="Weather">Vreme</b><span data-ro="vânt · presiune" data-en="wind · pressure">vânt · presiune</span></div>
+            <div class="orbit-node node-community"><b data-ro="Comunitate" data-en="Community">Comunitate</b><span data-ro="rapoarte · capturi" data-en="reports · catches">rapoarte · capturi</span></div>
+            <div class="orbit-node node-location"><b data-ro="Locație" data-en="Location">Locație</b><span data-ro="context local" data-en="local context">context local</span></div>
+            <div class="ai-message"><b data-ro="Fluvi spune:" data-en="Fluvi says:">Fluvi spune:</b> <span data-ro="„Condițiile sunt promițătoare, dar nivelul apei urcă. Încearcă zonele mai liniștite și verifică rapoartele recente înainte să pleci.”" data-en="‘Conditions look promising, but the water is rising. Try calmer areas and check recent reports before leaving.’">„Condițiile sunt promițătoare, dar nivelul apei urcă. Încearcă zonele mai liniștite și verifică rapoartele recente înainte să pleci.”</span></div>
+          </div>
+        </div>
+        <div class="split-copy reveal">
+          <div class="section-kicker" data-ro="Inteligență care explică" data-en="Intelligence that explains">Inteligență care explică</div>
+          <h2 data-ro="Fluvi nu îți promite pește. Îți explică semnalele." data-en="Fluvi does not promise fish. It explains the signals.">Fluvi nu îți promite pește. Îți explică semnalele.</h2>
+          <p data-ro="FluviScore este un motor explicabil în interiorul companionului Fluvi. Scorul combină factorii disponibili, iar Fluvi traduce rezultatul într-o recomandare clară, cu încredere și surse." data-en="FluviScore is an explainable engine inside the Fluvi companion. The score combines available factors, while Fluvi turns the result into a clear recommendation with confidence and sources.">FluviScore este un motor explicabil în interiorul companionului Fluvi. Scorul combină factorii disponibili, iar Fluvi traduce rezultatul într-o recomandare clară, cu încredere și surse.</p>
+          <ul class="benefit-list">
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Fără certitudini false" data-en="No false certainty">Fără certitudini false</strong><br><span data-ro="Când datele lipsesc sau sunt vechi, aplicația spune clar acest lucru." data-en="When data is missing or stale, the app says so clearly.">Când datele lipsesc sau sunt vechi, aplicația spune clar acest lucru.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Factori vizibili" data-en="Visible factors">Factori vizibili</strong><br><span data-ro="Apa, vremea, presiunea, vântul, solunarul și comunitatea pot fi urmărite separat." data-en="Water, weather, pressure, wind, solunar and community can be inspected separately.">Apa, vremea, presiunea, vântul, solunarul și comunitatea pot fi urmărite separat.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Învățare pe date reale" data-en="Learning from real data">Învățare pe date reale</strong><br><span data-ro="Evoluția AI vine după ce fundația de date este suficient de solidă." data-en="AI evolution comes after the data foundation is strong enough.">Evoluția AI vine după ce fundația de date este suficient de solidă.</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="community">
+      <div class="container split-section">
+        <div class="visual-panel reveal">
+          <span class="panel-label"><svg width="15" height="15"><use href="#i-users"></use></svg><span data-ro="Semnale din teren" data-en="Signals from the field">Semnale din teren</span></span>
+          <div class="community-stage">
+            <div class="report-card" style="--report-color:#ffc857"><div class="report-head"><span class="report-icon"><svg><use href="#i-water"></use></svg></span><div class="report-title"><b data-ro="Curent puternic" data-en="Strong current">Curent puternic</b><span data-ro="Raport confirmat de 4 pescari" data-en="Report confirmed by 4 anglers">Raport confirmat de 4 pescari</span></div><span class="report-distance">1.2 km</span></div><p class="report-body" data-ro="Apa s-a tulburat după-amiază. Accesul este bun, dar monturile ușoare sunt greu de ținut." data-en="The water became murkier in the afternoon. Access is good, but light rigs are difficult to hold.">Apa s-a tulburat după-amiază. Accesul este bun, dar monturile ușoare sunt greu de ținut.</p><div class="report-actions"><span class="confirm-chip" data-ro="✓ Pare corect" data-en="✓ Looks accurate">✓ Pare corect</span><span class="expiry" data-ro="Activ încă 6h" data-en="Active for 6h">Activ încă 6h</span></div></div>
+            <div class="report-card" style="--report-color:#29e38a"><div class="report-head"><span class="report-icon"><svg><use href="#i-fish"></use></svg></span><div class="report-title"><b data-ro="Activitate bună" data-en="Good activity">Activitate bună</b><span data-ro="Fotografie live opțională" data-en="Optional live photo">Fotografie live opțională</span></div><span class="report-distance">3.8 km</span></div><p class="report-body" data-ro="Mișcare la suprafață în golfurile ferite de vânt. Raportul nu dezvăluie coordonatele exacte." data-en="Surface activity in bays sheltered from the wind. The report does not reveal exact coordinates.">Mișcare la suprafață în golfurile ferite de vânt. Raportul nu dezvăluie coordonatele exacte.</p><div class="report-actions"><span class="confirm-chip" data-ro="✓ 7 confirmări" data-en="✓ 7 confirmations">✓ 7 confirmări</span><span class="expiry" data-ro="Activ încă 3h" data-en="Active for 3h">Activ încă 3h</span></div></div>
+            <div class="report-card" style="--report-color:#ff5c5c"><div class="report-head"><span class="report-icon"><svg><use href="#i-shield"></use></svg></span><div class="report-title"><b data-ro="Acces blocat" data-en="Access blocked">Acces blocat</b><span data-ro="Prioritate de siguranță" data-en="Safety priority">Prioritate de siguranță</span></div><span class="report-distance">6.1 km</span></div><p class="report-body" data-ro="Drumul de pământ este impracticabil după ploaie. Folosește traseul alternativ dinspre sud." data-en="The dirt road is impassable after rain. Use the alternative route from the south.">Drumul de pământ este impracticabil după ploaie. Folosește traseul alternativ dinspre sud.</p><div class="report-actions"><span class="confirm-chip" data-ro="✓ Raport util" data-en="✓ Useful report">✓ Raport util</span><span class="expiry" data-ro="Revalidare necesară" data-en="Revalidation needed">Revalidare necesară</span></div></div>
+          </div>
+        </div>
+        <div class="split-copy reveal">
+          <div class="section-kicker" data-ro="Comunitate live, nu zgomot social" data-en="Live community, not social noise">Comunitate live, nu zgomot social</div>
+          <h2 data-ro="Rapoartele oamenilor devin inteligență colectivă." data-en="People's reports become collective intelligence.">Rapoartele oamenilor devin inteligență colectivă.</h2>
+          <p data-ro="FluviAI organizează observațiile din teren în categorii clare, le limitează în timp când situația este temporară și le folosește pentru a oferi context — fără a transforma aplicația într-un concurs de popularitate." data-en="FluviAI organises field observations into clear categories, limits them in time when situations are temporary, and uses them to provide context — without turning the app into a popularity contest.">FluviAI organizează observațiile din teren în categorii clare, le limitează în timp când situația este temporară și le folosește pentru a oferi context — fără a transforma aplicația într-un concurs de popularitate.</p>
+          <ul class="benefit-list">
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Categorii structurate" data-en="Structured categories">Categorii structurate</strong><br><span data-ro="Apă, curent, activitate, acces, bărci, siguranță și alte situații reale." data-en="Water, current, activity, access, boats, safety and other real situations.">Apă, curent, activitate, acces, bărci, siguranță și alte situații reale.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Încredere și moderare" data-en="Trust and moderation">Încredere și moderare</strong><br><span data-ro="Confirmări, raportarea abuzului, anti-spam și filtrarea conținutului suspect." data-en="Confirmations, abuse reporting, anti-spam and suspicious-content filtering.">Confirmări, raportarea abuzului, anti-spam și filtrarea conținutului suspect.</span></span></li>
+            <li><svg><use href="#i-check"></use></svg><span><strong data-ro="Locație controlată" data-en="Controlled location">Locație controlată</strong><br><span data-ro="Exactă, aproximativă sau ascunsă — pescarul păstrează controlul." data-en="Exact, approximate or hidden — the angler stays in control.">Exactă, aproximativă sau ascunsă — pescarul păstrează controlul.</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="principles" id="principles">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker" data-ro="Constituția FluviAI" data-en="The FluviAI constitution">Constituția FluviAI</div>
+          <h2 data-ro="Un produs premium începe cu reguli care nu se negociază." data-en="A premium product starts with non-negotiable rules.">Un produs premium începe cu reguli care nu se negociază.</h2>
+          <p data-ro="FluviAI este construită pentru utilitate reală în teren. Orice funcție vizibilă trebuie să aibă un motiv clar, să respecte datele și să rămână rapidă și lizibilă." data-en="FluviAI is built for real usefulness in the field. Every visible feature must have a clear reason, respect the data, and remain fast and readable.">FluviAI este construită pentru utilitate reală în teren. Orice funcție vizibilă trebuie să aibă un motiv clar, să respecte datele și să rămână rapidă și lizibilă.</p>
+        </div>
+        <div class="principle-grid">
+          <article class="principle reveal"><span class="number">01</span><h3 data-ro="Date oficiale înaintea estimărilor" data-en="Official data before estimates">Date oficiale înaintea estimărilor</h3><p data-ro="Nicio cotă, tendință, captură sau locație nu este prezentată ca reală dacă nu există o sursă validă." data-en="No level, trend, catch or location is presented as real without a valid source.">Nicio cotă, tendință, captură sau locație nu este prezentată ca reală dacă nu există o sursă validă.</p></article>
+          <article class="principle reveal"><span class="number">02</span><h3 data-ro="Performanța este funcționalitate" data-en="Performance is functionality">Performanța este funcționalitate</h3><p data-ro="Startul, refreshul, cache-ul, offline-ul și lipsa requesturilor duplicate fac parte din experiență." data-en="Startup, refresh, cache, offline behaviour and the absence of duplicate requests are part of the experience.">Startul, refreshul, cache-ul, offline-ul și lipsa requesturilor duplicate fac parte din experiență.</p></article>
+          <article class="principle reveal"><span class="number">03</span><h3 data-ro="Privacy by design" data-en="Privacy by design">Privacy by design</h3><p data-ro="Coordonatele exacte nu sunt expuse implicit, iar metadatele foto sensibile sunt eliminate." data-en="Exact coordinates are not exposed by default, and sensitive photo metadata is removed.">Coordonatele exacte nu sunt expuse implicit, iar metadatele foto sensibile sunt eliminate.</p></article>
+          <article class="principle reveal"><span class="number">04</span><h3 data-ro="Claritate înaintea aglomerării" data-en="Clarity before clutter">Claritate înaintea aglomerării</h3><p data-ro="Mai puține controale, mai bine alese; fiecare ecran trebuie să fie responsive și ușor de înțeles." data-en="Fewer, better-chosen controls; every screen must be responsive and easy to understand.">Mai puține controale, mai bine alese; fiecare ecran trebuie să fie responsive și ușor de înțeles.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <div class="future-strip">
+      <div class="container">
+        <div class="future-card reveal">
+          <div><h3 data-ro="După fundația beta: FluviAI crește odată cu datele." data-en="After the beta foundation: FluviAI grows with the data.">După fundația beta: FluviAI crește odată cu datele.</h3><p data-ro="Recunoașterea speciei cu confirmare umană, mod offline complet, mai multe ape din România și extinderea europeană vin etapizat — fără să sacrificăm stabilitatea." data-en="Species recognition with human confirmation, full offline mode, more Romanian waters and European expansion will arrive step by step — without sacrificing stability.">Recunoașterea speciei cu confirmare umană, mod offline complet, mai multe ape din România și extinderea europeană vin etapizat — fără să sacrificăm stabilitatea.</p></div>
+          <div class="future-tags"><span class="future-tag" data-ro="Fluvi Vision" data-en="Fluvi Vision">Fluvi Vision</span><span class="future-tag" data-ro="Râuri și lacuri" data-en="Rivers and lakes">Râuri și lacuri</span><span class="future-tag" data-ro="Offline complet" data-en="Full offline">Offline complet</span><span class="future-tag" data-ro="Europa" data-en="Europe">Europa</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="beta-section" id="waitlist">
+      <div class="container beta-shell reveal">
+        <div class="beta-copy">
+          <span class="eyebrow"><i class="pulse-dot"></i><span data-ro="Founding Beta · 100 de pescari" data-en="Founding Beta · 100 anglers">Founding Beta · 100 de pescari</span></span>
+          <h2 data-ro="Ajută-ne să construim aplicația pe care ai folosi-o cu adevărat la apă." data-en="Help us build the app you would genuinely use by the water.">Ajută-ne să construim aplicația pe care ai folosi-o cu adevărat la apă.</h2>
+          <p data-ro="Căutăm pescari care pot testa funcțiile în situații reale, pot raporta clar problemele și vor să influențeze un produs construit pentru România." data-en="We are looking for anglers who can test features in real situations, report issues clearly, and want to influence a product built for Romania.">Căutăm pescari care pot testa funcțiile în situații reale, pot raporta clar problemele și vor să influențeze un produs construit pentru România.</p>
+          <div class="beta-limit"><span class="beta-number">100</span><span><b data-ro="Locuri în prima listă beta" data-en="Places in the first beta list">Locuri în prima listă beta</b><span data-ro="Selecția va urmări varietatea de zone, stiluri de pescuit și telefoane Android." data-en="Selection will seek a mix of regions, fishing styles and Android devices.">Selecția va urmări varietatea de zone, stiluri de pescuit și telefoane Android.</span></span></div>
+          <ul class="tester-list"><li><svg><use href="#i-check"></use></svg><span data-ro="Acces prioritar la versiunile de test." data-en="Priority access to test builds.">Acces prioritar la versiunile de test.</span></li><li><svg><use href="#i-check"></use></svg><span data-ro="Poți influența funcțiile, claritatea și ordinea priorităților." data-en="You can influence features, clarity and priorities.">Poți influența funcțiile, claritatea și ordinea priorităților.</span></li><li><svg><use href="#i-check"></use></svg><span data-ro="Feedbackul tău este analizat ca produs, nu doar ca listă de buguri." data-en="Your feedback is analysed as product insight, not just a bug list.">Feedbackul tău este analizat ca produs, nu doar ca listă de buguri.</span></li></ul>
+        </div>
+
+        <form class="waitlist-form" id="waitlistForm" name="fluviai-beta-waitlist" method="POST" data-netlify="true" netlify-honeypot="company" novalidate>
+          <input type="hidden" name="form-name" value="fluviai-beta-waitlist">
+          <div class="honeypot" aria-hidden="true"><label>Company <input name="company" tabindex="-1" autocomplete="off"></label></div>
+          <div class="form-grid">
+            <div class="form-field"><label for="name" data-ro="Prenume" data-en="First name">Prenume</label><input id="name" name="name" type="text" autocomplete="given-name" required maxlength="60" placeholder="Bogdan" data-ro-placeholder="Prenumele tău" data-en-placeholder="Your first name"></div>
+            <div class="form-field"><label for="email" data-ro="Email" data-en="Email">Email</label><input id="email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength="160" placeholder="nume@email.ro"></div>
+            <div class="form-field"><label for="region" data-ro="Județ / regiune" data-en="County / region">Județ / regiune</label><input id="region" name="region" type="text" autocomplete="address-level1" maxlength="100" data-ro-placeholder="Ex: Brăila, Galați, Bristol" data-en-placeholder="e.g. Brăila, Galați, Bristol"></div>
+            <div class="form-field"><label for="device" data-ro="Telefon principal" data-en="Main phone">Telefon principal</label><input id="device" name="device" type="text" maxlength="100" data-ro-placeholder="Ex: Samsung S24 Ultra" data-en-placeholder="e.g. Samsung S24 Ultra"></div>
+            <div class="form-field"><label for="fishing" data-ro="Unde pescuiești cel mai des?" data-en="Where do you fish most often?">Unde pescuiești cel mai des?</label><select id="fishing" name="fishing"><option value="" data-ro="Alege" data-en="Choose">Alege</option><option value="danube" data-ro="Dunăre" data-en="Danube">Dunăre</option><option value="river" data-ro="Râuri" data-en="Rivers">Râuri</option><option value="lake" data-ro="Lacuri / acumulări" data-en="Lakes / reservoirs">Lacuri / acumulări</option><option value="canal" data-ro="Canale / deltă" data-en="Canals / delta">Canale / deltă</option><option value="mixed" data-ro="Mixt" data-en="Mixed">Mixt</option></select></div>
+            <div class="form-field"><label for="experience" data-ro="Experiență" data-en="Experience">Experiență</label><select id="experience" name="experience"><option value="" data-ro="Alege" data-en="Choose">Alege</option><option value="beginner" data-ro="Începător" data-en="Beginner">Începător</option><option value="intermediate" data-ro="Intermediar" data-en="Intermediate">Intermediar</option><option value="advanced" data-ro="Avansat" data-en="Advanced">Avansat</option><option value="expert" data-ro="Foarte experimentat" data-en="Highly experienced">Foarte experimentat</option></select></div>
+            <div class="form-field full"><label for="motivation" data-ro="Ce ai vrea să rezolve FluviAI pentru tine? (opțional)" data-en="What would you like FluviAI to solve for you? (optional)">Ce ai vrea să rezolve FluviAI pentru tine? (opțional)</label><textarea id="motivation" name="motivation" maxlength="600" data-ro-placeholder="Spune-ne ce îți lipsește astăzi când planifici o partidă de pescuit." data-en-placeholder="Tell us what is missing today when you plan a fishing session."></textarea></div>
+          </div>
+          <label class="consent"><input id="consent" name="consent" type="checkbox" value="yes" required><span data-ro="Sunt de acord ca FluviAI să folosească datele introduse exclusiv pentru lista beta, contactarea mea despre testare și administrarea feedbackului. Îmi pot retrage acordul ulterior." data-en="I agree that FluviAI may use the information provided only for the beta list, contacting me about testing, and managing feedback. I can withdraw consent later.">Sunt de acord ca FluviAI să folosească datele introduse exclusiv pentru lista beta, contactarea mea despre testare și administrarea feedbackului. Îmi pot retrage acordul ulterior.</span></label>
+          <div class="form-actions"><button class="btn btn-primary" type="submit" id="submitBtn"><span data-ro="Înscrie-mă pe waiting list" data-en="Join the waiting list">Înscrie-mă pe waiting list</span><svg width="18" height="18"><use href="#i-arrow"></use></svg></button><span class="form-note"><svg width="12" height="12" style="vertical-align:-2px"><use href="#i-lock"></use></svg> <span data-ro="Fără spam. Doar informații despre beta." data-en="No spam. Beta updates only.">Fără spam. Doar informații despre beta.</span></span></div>
+          <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+          <p class="beta-contact">
+            <span data-ro="Întrebări despre beta, parteneriate, presă sau suport:" data-en="Questions about beta, partnerships, press or support:">Întrebări despre beta, parteneriate, presă sau suport:</span>
+            <a href="mailto:contact@fluviai.com">contact@fluviai.com</a>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <div class="section-head reveal"><div class="section-kicker" data-ro="Întrebări despre beta" data-en="Beta questions">Întrebări despre beta</div><h2 data-ro="Ce trebuie să știi înainte să te înscrii." data-en="What to know before joining.">Ce trebuie să știi înainte să te înscrii.</h2></div>
+        <div class="faq-grid">
+          <details class="reveal"><summary data-ro="FluviAI este deja disponibilă în Google Play?" data-en="Is FluviAI already available on Google Play?">FluviAI este deja disponibilă în Google Play?</summary><p data-ro="Nu încă. Aplicația este în dezvoltare și stabilizare. Lista este pentru prima rundă controlată de testare beta, înaintea lansării publice." data-en="Not yet. The app is in development and stabilisation. This list is for the first controlled beta testing round before public release.">Nu încă. Aplicația este în dezvoltare și stabilizare. Lista este pentru prima rundă controlată de testare beta, înaintea lansării publice.</p></details>
+          <details class="reveal"><summary data-ro="Cei 100 de înscriși intră automat în beta?" data-en="Do all 100 applicants automatically enter the beta?">Cei 100 de înscriși intră automat în beta?</summary><p data-ro="Lista are 100 de locuri inițiale, iar selecția poate ține cont de regiune, tipul de pescuit, telefon și disponibilitatea pentru feedback. Înscrierea nu garantează automat accesul." data-en="The initial list has 100 places, and selection may consider region, fishing type, phone and availability for feedback. Joining the list does not automatically guarantee access.">Lista are 100 de locuri inițiale, iar selecția poate ține cont de regiune, tipul de pescuit, telefon și disponibilitatea pentru feedback. Înscrierea nu garantează automat accesul.</p></details>
+          <details class="reveal"><summary data-ro="FluviAI va fi doar pentru Dunăre?" data-en="Will FluviAI be only for the Danube?">FluviAI va fi doar pentru Dunăre?</summary><p data-ro="Dunărea este fundația inițială pentru nivelurile reale ale apei. Direcția produsului include râuri, lacuri, acumulări și extindere europeană după validarea surselor și stabilizarea aplicației." data-en="The Danube is the initial foundation for real water levels. The product direction includes rivers, lakes, reservoirs and European expansion after source validation and app stabilisation.">Dunărea este fundația inițială pentru nivelurile reale ale apei. Direcția produsului include râuri, lacuri, acumulări și extindere europeană după validarea surselor și stabilizarea aplicației.</p></details>
+          <details class="reveal"><summary data-ro="FluviAI garantează capturi?" data-en="Does FluviAI guarantee catches?">FluviAI garantează capturi?</summary><p data-ro="Nu. FluviAI oferă date, context și explicații. Natura și pescuitul rămân imprevizibile, iar decizia finală aparține pescarului." data-en="No. FluviAI provides data, context and explanations. Nature and fishing remain unpredictable, and the final decision belongs to the angler.">Nu. FluviAI oferă date, context și explicații. Natura și pescuitul rămân imprevizibile, iar decizia finală aparține pescarului.</p></details>
+          <details class="reveal"><summary data-ro="Locațiile mele vor fi publice?" data-en="Will my locations be public?">Locațiile mele vor fi publice?</summary><p data-ro="Nu implicit. FluviAI este construită cu opțiuni de locație exactă, aproximativă sau ascunsă și cu eliminarea metadatelor GPS din fotografiile pregătite pentru publicare." data-en="Not by default. FluviAI is built with exact, approximate or hidden location options and removal of GPS metadata from photos prepared for publication.">Nu implicit. FluviAI este construită cu opțiuni de locație exactă, aproximativă sau ascunsă și cu eliminarea metadatelor GPS din fotografiile pregătite pentru publicare.</p></details>
+          <details class="reveal"><summary data-ro="Cum pot contacta echipa FluviAI?" data-en="How can I contact the FluviAI team?">Cum pot contacta echipa FluviAI?</summary><p><span data-ro="Pentru orice întrebare despre beta, produs, parteneriate, presă, confidențialitate sau suport, scrie la " data-en="For any questions about beta, the product, partnerships, press, privacy or support, email ">Pentru orice întrebare despre beta, produs, parteneriate, presă, confidențialitate sau suport, scrie la </span><a class="contact-inline" href="mailto:contact@fluviai.com">contact@fluviai.com</a>.</p></details>
+          <details class="reveal"><summary data-ro="Ce se așteaptă de la un tester?" data-en="What is expected from a tester?">Ce se așteaptă de la un tester?</summary><p data-ro="Să folosească aplicația în situații reale, să descrie clar pașii unei probleme, să trimită capturi sau loguri când este necesar și să ofere feedback despre utilitate, claritate și rapiditate." data-en="To use the app in real situations, clearly describe the steps behind an issue, provide screenshots or logs when needed, and give feedback on usefulness, clarity and speed.">Să folosească aplicația în situații reale, să descrie clar pașii unei probleme, să trimită capturi sau loguri când este necesar și să ofere feedback despre utilitate, claritate și rapiditate.</p></details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div class="footer-brand"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><svg><use href="#i-wave"></use></svg></span><span class="brand-copy"><span class="wordmark-fallback">Fluvi<b>AI</b></span></span></a><p data-ro="FluviAI — harta inteligentă pentru pescari, construită din date reale, context și comunitate. Prima piață: România." data-en="FluviAI — the intelligent map for anglers, built from real data, context and community. First market: Romania.">FluviAI — harta inteligentă pentru pescari, construită din date reale, context și comunitate. Prima piață: România.</p></div>
+      <div class="footer-meta"><div>© <span id="year"></span> FluviAI</div><div><a href="#waitlist" data-ro="Beta privată" data-en="Private beta">Beta privată</a> · <a href="#principles" data-ro="Principii" data-en="Principles">Principii</a></div><div><a class="contact-inline" href="mailto:contact@fluviai.com">contact@fluviai.com</a></div><div data-ro="Acolo unde pasiunea întâlnește firul apei." data-en="Where passion meets the flow of water.">Acolo unde pasiunea întâlnește firul apei.</div></div>
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    // CONFIGURARE WAITING LIST
+    // Variante suportate: Supabase, endpoint JSON generic sau Netlify Forms.
+    // Nu pune niciodată cheia Supabase service_role în index.html.
+    const WAITLIST_CONFIG = {
+      supabaseUrl: '',              // ex: https://PROJECT.supabase.co
+      supabaseAnonKey: '',          // doar cheia publică anon
+      supabaseTable: 'beta_waitlist',
+      endpoint: '',                 // alternativ: endpoint HTTPS care acceptă JSON POST
+      betaLimit: 100,
+      contactEmail: 'contact@fluviai.com'
+    };
+
+    function storageGet(key) {
+      try { return window.localStorage.getItem(key); } catch (_) { return null; }
+    }
+
+    function storageSet(key, value) {
+      try { window.localStorage.setItem(key, value); } catch (_) { /* storage unavailable */ }
+    }
+
+    const state = {
+      lang: storageGet('fluviai-site-lang') === 'en' ? 'en' : 'ro'
+    };
+
+    const q = (selector, root = document) => root.querySelector(selector);
+    const qa = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+    function applyLanguage(lang) {
+      state.lang = lang;
+      document.documentElement.lang = lang;
+      storageSet('fluviai-site-lang', lang);
+
+      qa('[data-ro][data-en]').forEach((el) => {
+        el.textContent = el.dataset[lang];
+      });
+      qa('[data-ro-placeholder][data-en-placeholder]').forEach((el) => {
+        el.placeholder = el.dataset[`${lang}Placeholder`];
+      });
+      qa('[data-lang]').forEach((button) => {
+        const active = button.dataset.lang === lang;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+
+      const menuToggle = q('.menu-toggle');
+      if (menuToggle) menuToggle.setAttribute('aria-label', lang === 'ro' ? 'Deschide meniul' : 'Open menu');
+      document.title = lang === 'ro'
+        ? 'FluviAI — Acolo unde pasiunea întâlnește firul apei'
+        : 'FluviAI — Where passion meets the flow of water';
+    }
+
+    qa('[data-lang]').forEach((button) => {
+      button.addEventListener('click', () => applyLanguage(button.dataset.lang));
+    });
+
+    const menuToggle = q('.menu-toggle');
+    const navLinks = q('#navLinks');
+    menuToggle?.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('mobile-open');
+      menuToggle.setAttribute('aria-expanded', String(open));
+    });
+    qa('#navLinks a').forEach((link) => link.addEventListener('click', () => {
+      navLinks.classList.remove('mobile-open');
+      menuToggle?.setAttribute('aria-expanded', 'false');
+    }));
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.10, rootMargin: '0px 0px -45px' });
+    qa('.reveal').forEach((el) => revealObserver.observe(el));
+
+    function setStatus(type, ro, en) {
+      const status = q('#formStatus');
+      status.className = `form-status show ${type}`;
+      status.textContent = state.lang === 'ro' ? ro : en;
+    }
+
+    function formPayload(form) {
+      const data = new FormData(form);
+      return {
+        name: String(data.get('name') || '').trim(),
+        email: String(data.get('email') || '').trim().toLowerCase(),
+        region: String(data.get('region') || '').trim() || null,
+        device: String(data.get('device') || '').trim() || null,
+        fishing: String(data.get('fishing') || '').trim() || null,
+        experience: String(data.get('experience') || '').trim() || null,
+        motivation: String(data.get('motivation') || '').trim() || null,
+        consent: data.get('consent') === 'yes',
+        language: state.lang,
+        source: 'website_waitlist',
+        created_at: new Date().toISOString()
+      };
+    }
+
+    function validateWaitlist(payload) {
+      if (!payload.name || payload.name.length < 2) return 'name';
+      if (!/^\S+@\S+\.\S+$/.test(payload.email)) return 'email';
+      if (!payload.consent) return 'consent';
+      return null;
+    }
+
+    async function submitToSupabase(payload) {
+      const url = `${WAITLIST_CONFIG.supabaseUrl.replace(/\/$/, '')}/rest/v1/${encodeURIComponent(WAITLIST_CONFIG.supabaseTable)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': WAITLIST_CONFIG.supabaseAnonKey,
+          'Authorization': `Bearer ${WAITLIST_CONFIG.supabaseAnonKey}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        const duplicate = response.status === 409 || /duplicate|unique/i.test(body);
+        const error = new Error(duplicate ? 'duplicate' : 'supabase');
+        error.status = response.status;
+        throw error;
+      }
+    }
+
+    async function submitToEndpoint(payload) {
+      const response = await fetch(WAITLIST_CONFIG.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error('endpoint');
+    }
+
+    async function submitToNetlify(form) {
+      const body = new URLSearchParams(new FormData(form));
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      });
+      if (!response.ok) throw new Error('netlify');
+    }
+
+    const waitlistForm = q('#waitlistForm');
+    waitlistForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const honeypot = String(new FormData(form).get('company') || '').trim();
+      if (honeypot) return;
+
+      const payload = formPayload(form);
+      const validation = validateWaitlist(payload);
+      if (validation) {
+        const messages = {
+          name: ['Completează un prenume valid.', 'Enter a valid first name.'],
+          email: ['Completează o adresă de email validă.', 'Enter a valid email address.'],
+          consent: ['Este necesar acordul pentru administrarea listei beta.', 'Consent is required to manage the beta list.']
+        };
+        setStatus('error', messages[validation][0], messages[validation][1]);
+        q(`#${validation}`)?.focus();
+        return;
+      }
+
+      const submitButton = q('#submitBtn');
+      submitButton.disabled = true;
+      submitButton.style.opacity = '.72';
+      setStatus('info', 'Se trimite înscrierea…', 'Submitting your application…');
+
+      try {
+        if (WAITLIST_CONFIG.supabaseUrl && WAITLIST_CONFIG.supabaseAnonKey) {
+          await submitToSupabase(payload);
+        } else if (WAITLIST_CONFIG.endpoint) {
+          await submitToEndpoint(payload);
+        } else if (/netlify\.app$/i.test(location.hostname) || document.documentElement.hasAttribute('data-netlify-deployed')) {
+          await submitToNetlify(form);
+        } else {
+          storageSet('fluviai-waitlist-draft', JSON.stringify(payload));
+          setStatus(
+            'info',
+            `Datele au fost validate și salvate local, dar formularul online nu este încă conectat. Configurează Supabase/Netlify înainte de publicare sau scrie la ${WAITLIST_CONFIG.contactEmail}.`,
+            `The data was validated and saved locally, but the online form is not connected yet. Configure Supabase/Netlify before publishing or email ${WAITLIST_CONFIG.contactEmail}.`
+          );
+          return;
+        }
+
+        form.reset();
+        setStatus(
+          'success',
+          'Înscriere trimisă. Mulțumim — te vom contacta când începe selecția beta.',
+          'Application sent. Thank you — we will contact you when beta selection begins.'
+        );
+      } catch (error) {
+        if (error?.message === 'duplicate') {
+          setStatus('info', 'Acest email este deja înscris pe lista beta.', 'This email is already on the beta list.');
+        } else {
+          setStatus('error', `Înscrierea nu a putut fi trimisă. Încearcă din nou sau scrie la ${WAITLIST_CONFIG.contactEmail}.`, `Your application could not be sent. Try again or email ${WAITLIST_CONFIG.contactEmail}.`);
+        }
+      } finally {
+        submitButton.disabled = false;
+        submitButton.style.opacity = '';
+      }
+    });
+
+    q('#year').textContent = new Date().getFullYear();
+    applyLanguage(state.lang);
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FluviAI",
+    "applicationCategory": "SportsApplication",
+    "operatingSystem": "Android",
+    "description": "Aplicație de pescuit cu hartă, niveluri reale ale apei, vreme, rapoarte comunitare, capturi și inteligență explicabilă.",
+    "inLanguage": ["ro", "en"],
+    "isAccessibleForFree": true,
+    "email": "contact@fluviai.com"
+  }
+  </script>
+</body>
+</html>
